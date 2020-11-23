@@ -42,7 +42,7 @@ def epicenter_record_to_dic(line: str):
 
 def open_code_p():
     code_p = {}
-    with open('data/code_p') as f:
+    with open('record/code_p') as f:
         line = f.readline().replace('\n', '')
         while line:
             line_splited = line.split()
@@ -123,5 +123,5 @@ if __name__ == '__main__':
 
             line = f.readline().replace('\n', '')
 
-        with open('data/' + sys.argv[2], 'w') as f:
+        with open('record/' + sys.argv[2], 'w') as f:
             json.dump(json_dic, f, indent=4)
