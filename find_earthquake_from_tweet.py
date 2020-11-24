@@ -28,7 +28,7 @@ def tweet_time2earthquake(tweet_time):
         big_dic = json.load(f)
 
     near_dic = {}
-    near2_dic = {}
+    #near2_dic = {}
     min_diff = timedelta.max
     JST = dt.timezone(timedelta(hours=+9), 'JST')
 
@@ -42,11 +42,12 @@ def tweet_time2earthquake(tweet_time):
             td_abs = tweet_time - dic_date_dt
             if(td_abs < min_diff):
                 min_diff = td_abs
-                near2_dic = near_dic
+                #near2_dic = near_dic
                 near_dic = dic
 
     print("1番近い地震:", near_dic)
-    print("２番近い地震:", near2_dic)
+
+    return near_dic
 
 
 if __name__ == '__main__':
