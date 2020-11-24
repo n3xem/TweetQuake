@@ -65,7 +65,20 @@ def intensity_record_to_dic(line: str):
     return dic
 
 
+def intensities_add_record(intensities: list, line: str):
+    intensities.append(intensity_record_to_dic(line))
+    if intensities[-1]["observ_point_num"] not in code_p:
+        del intensities[-1]
+    else:
+        intensities[-1]["latitude"] = code_p[intensities[-1]
+                                             ["observ_point_num"]]["latitude"]
+        intensities[-1]["longitude"] = code_p[intensities[-1]
+                                              ["observ_point_num"]]["longitude"]
+
+
 if __name__ == '__main__':
+
+    MIN_INTENSITY = '2'  # 1-7で
     if len(sys.argv) <= 2:
         print('引数を指定して')
         sys.exit()
@@ -81,45 +94,29 @@ if __name__ == '__main__':
 
         line = f.readline().replace('\n', '')
         while line:
-            if re.match(r'^A', line):
+            if re.match(r'^A.{60}[' + MIN_INTENSITY + r'-7A-D]', line):
                 # print(line)
                 json_dic["data"].append(epicenter_record_to_dic(line))
                 json_dic["data"][-1]["intensities"] = []
+                intensities = json_dic["data"][-1]["intensities"]
 
                 for i in range(json_dic["data"][-1]["observ_point_num"]):
                     line = f.readline().replace('\n', '')
                     # print(line)
-                    json_dic["data"][-1]["intensities"].append(
-                        intensity_record_to_dic(line))
 
-                    if json_dic["data"][-1]["intensities"][-1]["observ_point_num"] not in code_p:
-                        del json_dic["data"][-1]["intensities"][-1]
-                    else:
-                        json_dic["data"][-1]["intensities"][-1]["latitude"] = code_p[json_dic["data"]
-                                                                                     [-1]["intensities"][-1]["observ_point_num"]]["latitude"]
-                        json_dic["data"][-1]["intensities"][-1]["longitude"] = code_p[json_dic["data"]
-                                                                                      [-1]["intensities"][-1]["observ_point_num"]]["longitude"]
+                    intensities_add_record(intensities, line)
 
-            elif re.match(r'^B', line):
+            elif re.match(r'^B.{60}[' + MIN_INTENSITY + r'2-7A-D]', line):
                 # print(line)
                 json_dic["data"].append(epicenter_record_to_dic(line))
                 json_dic["data"][-1]["intensities"] = []
+                intensities = json_dic["data"][-1]["intensities"]
 
                 for i in range(json_dic["data"][-1]["observ_point_num"]):
                     while re.match(r'^B', line := f.readline().replace('\n', '')):
                         continue
-                    #line = f.readline().replace('\n', '')
                     # print(line)
-                    json_dic["data"][-1]["intensities"].append(
-                        intensity_record_to_dic(line))
-
-                    if json_dic["data"][-1]["intensities"][-1]["observ_point_num"] not in code_p:
-                        del json_dic["data"][-1]["intensities"][-1]
-                    else:
-                        json_dic["data"][-1]["intensities"][-1]["latitude"] = code_p[json_dic["data"]
-                                                                                     [-1]["intensities"][-1]["observ_point_num"]]["latitude"]
-                        json_dic["data"][-1]["intensities"][-1]["longitude"] = code_p[json_dic["data"]
-                                                                                      [-1]["intensities"][-1]["observ_point_num"]]["longitude"]
+                    intensities_add_record(intensities, line)
 
             line = f.readline().replace('\n', '')
 
