@@ -1,0 +1,52 @@
+{% extends "layout.html" %}
+{% block title %} Map {% endblock %}
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css">
+<link rel="stylesheet" href="static/css/style.css">
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+{% endblock %}
+{% block body %}
+<h1> TweetQuake</h1>
+<div id="mapid"></div>
+<script type="text/javascript">
+var map = L.map('mapid', {
+  center: [36, 140],
+  zoom: 5,
+});
+var tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© <a href="http://osm.org/copyright">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+});
+tileLayer.addTo(map);
+ let test = {{ quake_dic | tojson }};
+
+ let intensity_colorcode = {
+        1: '#0c0e0e',
+        2: '#0f3b3d',
+        3: '#00269a',
+        4: '#5d4d0d',
+        A: '#c2b326',
+        B: '#b47518',
+        C: '#9f1b03',
+        D: '#770012',
+        7: '#86004b'
+    };
+
+intensities = test["intensities"];
+for (let i in intensities){
+    let lat = intensities[i]["latitude"];
+    let lon = intensities[i]["longitude"];
+    let latlng = L.latLng(lat, lon);
+    let observ = intensities[i]["observ_point_num"];
+    let intensity_num = intensities[i]["intensity"];
+
+    let circle = L.circle(latlng, {
+        color: intensity_colorcode[intensity_num],
+        fillColor: intensity_colorcode[intensity_num],
+        fillOpacity:0.3,
+        radius: 1000
+    }).addTo(map);
+}
+
+</script>
+
+{% endblock %}

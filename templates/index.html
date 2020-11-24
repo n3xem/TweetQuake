@@ -1,12 +1,18 @@
 {% extends "layout.html" %}
 {% block title %} Map {% endblock %}
+{% block head %}
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css">
+<link rel="stylesheet" href="static/css/style.css">
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+{% endblock %}
 {% block body %}
 <h1> TweetQuake</h1>
-<form action="/result" method="GET">
-    <label for="article">Tweet URL</label>
+<form action="/result" method="get">
+    <label for="url">Tweet URL</label>
     <input type="text" name="name">
     <button type="submit">送信</button>
 </form>
-<iframe class="map", src="/map" width="600", height="600"></iframe>
+
+</script>
 
 {% endblock %}

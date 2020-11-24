@@ -45,7 +45,7 @@ def tweet_time2earthquake(tweet_time):
                 #near2_dic = near_dic
                 near_dic = dic
 
-    print("1番近い地震:", near_dic)
+    # print("1番近い地震:", near_dic)
 
     return near_dic
 
