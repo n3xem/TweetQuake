@@ -46,11 +46,13 @@ def open_code_p():
         line = f.readline().replace('\n', '')
         while line:
             line_splited = line.split()
+            latitude_minute = int(line_splited[2][2:])
+            longitude_minute = int(line_splited[3][3:])
             code_p[line_splited[0]] = {}
-            code_p[line_splited[0]]["latitude"] = float(
-                line_splited[2][:2] + '.' + line_splited[2][2:])
-            code_p[line_splited[0]]["longitude"] = float(
-                line_splited[3][:3] + '.' + line_splited[3][3:])
+            code_p[line_splited[0]]["latitude"] = int(
+                line_splited[2][:2]) + (latitude_minute / 60)
+            code_p[line_splited[0]]["longitude"] = int(
+                line_splited[3][:3]) + (longitude_minute / 60)
 
             line = f.readline().replace('\n', '')
 
