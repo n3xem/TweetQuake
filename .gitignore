@@ -165,4 +165,6 @@ dmypy.json
 .prof
 
 # End of https://www.toptal.com/developers/gitignore/api/flask
-record/
+/record/*
+!/record/*.json
+!/record/code_p
