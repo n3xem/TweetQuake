@@ -124,8 +124,21 @@ L.control.form({position: 'topleft'}).addTo(map);
 
 //type=hiddenでツイートリスを置いておく
 for(let i in tweet_urls){
-  document.getElementById("form").insertAdjacentHTML('afterbegin', "<input type=\"hidden\" name=\"name\" value=\"" + tweet_urls[i] + "\">");
+  document.getElementById("form").insertAdjacentHTML('afterbegin', '<input type="hidden" name="name" value="' + tweet_urls[i] + '">');
   //document.getElementById("tweeturlpv").insertAdjacentHTML('afterbegin', "<p>" + tweet_urls[i] + "<\/p>");
+}
+
+//checkboxの横にformを置いてボタンとhiddeninputを追加する
+for(let i = 0; i < tweet_urls.length; i++){
+  let overlay_span_element = document.querySelector('.leaflet-control-layers-overlays label:nth-child(' + (i+1) + ') div span');
+  overlay_span_element.insertAdjacentHTML('afterend', '<form action="/result" method="get" style="display: inline" id="remove' + i + '"><button type="submit">削除</button></form>');
+
+  let form = document.querySelector('#remove' + i);
+  for(let j = 0; j < tweet_urls.length; j++){
+    if(i != j){
+      form.insertAdjacentHTML('afterbegin', '<input type="hidden" name="name" value="' + tweet_urls[j] + '">');
+    }
+  }
 }
 
 </script>

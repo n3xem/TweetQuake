@@ -22,7 +22,7 @@ def tweetid2time(tweetid: int):
 
 
 def tweet_time2earthquake(tweet_time):
-    print("TWEET_URL:", tweet_time)
+    # print("TWEET_URL:", tweet_time)
 
     with open('record/i' + str(tweet_time.year)+'.json') as f:
         big_dic = json.load(f)
