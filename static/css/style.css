@@ -25,4 +25,5 @@ button[type="submit"]{
      color: #fff;
      appearance: none;
      cursor: pointer;
+     margin: 4px;
 }
