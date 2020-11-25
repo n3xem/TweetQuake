@@ -107,7 +107,7 @@ L.Control.form = L.Control.extend({
     text.innerHTML = `<form action="/result" method="get" id="form">
     <label for="url">Tweet URL</label>
     <input type="text" name="name">
-    <button type="submit">送信</button>
+    <button type="submit">追加</button>
 </form>`;
     return text;
   },
@@ -119,8 +119,22 @@ L.Control.form = L.Control.extend({
 L.control.form = function(opts){
   return new L.Control.form(opts);
 }
-
 L.control.form({position: 'topleft'}).addTo(map);
+
+//mapの上に置くlabelを定義
+L.Control.label = L.Control.extend({
+  onAdd: function(map){
+    let text = L.DomUtil.create('div');
+    text.id = "source";
+    text.innerHTML = '<p>気象庁「震度データ 2010～2018」（https://www.data.jma.go.jp/svd/eqev/data/bulletin/shindo.html）を加工して作成</p>';
+    return text;
+  },
+  onRemove: function(map){}
+});
+L.control.label = function(opts){
+  return new L.Control.label(opts);
+}
+L.control.label({position: 'bottomleft'}).addTo(map);
 
 //type=hiddenでツイートリスを置いておく
 for(let i in tweet_urls){
