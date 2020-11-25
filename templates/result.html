@@ -7,17 +7,15 @@
 {% endblock %}
 {% block body %}
 <h1> TweetQuake</h1>
+<div id="tweeturlpv"></div>
+<form action="/result" method="get" id="form">
+    <label for="url">Tweet URL</label>
+    <input type="text" name="name">
+    <button type="submit">送信</button>
+</form>
 <div id="mapid"></div>
 <script type="text/javascript">
-var map = L.map('mapid', {
-  center: [36, 140],
-  zoom: 5,
-});
-var tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '© <a href="http://osm.org/copyright">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
-});
-tileLayer.addTo(map);
- let test = {{ quake_dic | tojson }};
+ let tests = JSON.parse('{{ quake_dics | tojson }}');
 
  let intensity_colorcode = {
         1: '#0c0e0e',
@@ -31,20 +29,54 @@ tileLayer.addTo(map);
         7: '#86004b'
     };
 
-intensities = test["intensities"];
-for (let i in intensities){
-    let lat = intensities[i]["latitude"];
-    let lon = intensities[i]["longitude"];
-    let latlng = L.latLng(lat, lon);
-    let observ = intensities[i]["observ_point_num"];
-    let intensity_num = intensities[i]["intensity"];
+let tweet_intensities = [];
 
-    let circle = L.circle(latlng, {
-        color: intensity_colorcode[intensity_num],
-        fillColor: intensity_colorcode[intensity_num],
-        fillOpacity:0.3,
-        radius: 1000
-    }).addTo(map);
+for(let j in tests){
+  intensities = tests[j]["intensities"];
+  let circles = [];
+  for (let i in intensities){
+      let lat = intensities[i]["latitude"];
+      let lon = intensities[i]["longitude"];
+      let latlng = L.latLng(lat, lon);
+      let observ = intensities[i]["observ_point_num"];
+      let intensity_num = intensities[i]["intensity"];
+
+
+      let circle = L.circle(latlng, {
+          color: intensity_colorcode[intensity_num],
+          fillColor: intensity_colorcode[intensity_num],
+          fillOpacity:0.3,
+          radius: 1000
+      });
+    circles.push(circle);
+  }
+  tweet_intensities.push(L.layerGroup(circles));
+}
+let tweet_urls = JSON.parse('{{ tweet_urls | tojson }}');
+
+let overlayLayerControls = {};
+for(let i in tweet_urls){
+  overlayLayerControls[tweet_urls[i]] = tweet_intensities[i];
+}
+
+
+var tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© <a href="http://osm.org/copyright">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+});
+var map = L.map('mapid', {
+  center: [36, 140],
+  zoom: 5,
+  layers: [tileLayer].concat(tweet_intensities),
+});
+
+
+L.control.layers(null, overlayLayerControls,{
+  collapsed: false,
+}).addTo(map);
+
+for(let i in tweet_urls){
+  document.getElementById("form").insertAdjacentHTML('afterbegin', "<input type=\"hidden\" name=\"name\" value=\"" + tweet_urls[i] + "\">");
+  //document.getElementById("tweeturlpv").insertAdjacentHTML('afterbegin', "<p>" + tweet_urls[i] + "<\/p>");
 }
 
 </script>
