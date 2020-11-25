@@ -1,21 +1,22 @@
 {% extends "layout.html" %}
 {% block title %} Map {% endblock %}
 {% block head %}
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css">
 <link rel="stylesheet" href="static/css/style.css">
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 {% endblock %}
 {% block body %}
-<h1> TweetQuake</h1>
-<div id="tweeturlpv"></div>
+<!--
 <form action="/result" method="get" id="form">
     <label for="url">Tweet URL</label>
     <input type="text" name="name">
     <button type="submit">送信</button>
 </form>
+-->
 <div id="mapid"></div>
 <script type="text/javascript">
- let tests = JSON.parse('{{ quake_dics | tojson }}');
+ let quake_dics = JSON.parse('{{ quake_dics | tojson }}');
 
  let intensity_colorcode = {
         1: '#0c0e0e',
@@ -31,8 +32,8 @@
 
 let tweet_intensities = [];
 
-for(let j in tests){
-  intensities = tests[j]["intensities"];
+for(let j in quake_dics){
+  intensities = quake_dics[j]["intensities"];
   let circles = [];
   for (let i in intensities){
       let lat = intensities[i]["latitude"];
@@ -54,12 +55,35 @@ for(let j in tests){
 }
 let tweet_urls = JSON.parse('{{ tweet_urls | tojson }}');
 
+//重複観測点を追加
+let overlap_observ_points = JSON.parse('{{ overlap_observ_points | tojson }}');
+
+let overlap_circles = [];
+for(let i in overlap_observ_points){
+  let lat = overlap_observ_points[i]["latitude"];
+  let lon = overlap_observ_points[i]["longitude"];
+  let latlng = L.latLng(lat,lon);
+
+  let circle = L.circle(latlng, {
+    color: '#ff0000',
+    fillColor: '#ff0000',
+    fillOpacity: 0.3,
+    radius:1000
+  });
+
+  overlap_circles.push(circle);
+}
+
+overlap_layergroup = L.layerGroup(overlap_circles);
+
+//チェックボックスの項目
 let overlayLayerControls = {};
 for(let i in tweet_urls){
   overlayLayerControls[tweet_urls[i]] = tweet_intensities[i];
 }
+overlayLayerControls["重複している観測点"] = overlap_layergroup;
 
-
+//マップ作製
 var tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '© <a href="http://osm.org/copyright">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
 });
@@ -68,12 +92,37 @@ var map = L.map('mapid', {
   zoom: 5,
   layers: [tileLayer].concat(tweet_intensities),
 });
+map.zoomControl.setPosition("bottomright");
 
-
+//オーバーレイレイヤーを追加
 L.control.layers(null, overlayLayerControls,{
   collapsed: false,
 }).addTo(map);
 
+//mapの上におくformを定義
+L.Control.form = L.Control.extend({
+  onAdd: function(map){
+    let text = L.DomUtil.create('div');
+    text.id= "l-control-form";
+    text.innerHTML = `<form action="/result" method="get" id="form">
+    <label for="url">Tweet URL</label>
+    <input type="text" name="name">
+    <button type="submit">送信</button>
+</form>`;
+    return text;
+  },
+
+  onRemove: function(map){
+
+  }
+});
+L.control.form = function(opts){
+  return new L.Control.form(opts);
+}
+
+L.control.form({position: 'topleft'}).addTo(map);
+
+//type=hiddenでツイートリスを置いておく
 for(let i in tweet_urls){
   document.getElementById("form").insertAdjacentHTML('afterbegin', "<input type=\"hidden\" name=\"name\" value=\"" + tweet_urls[i] + "\">");
   //document.getElementById("tweeturlpv").insertAdjacentHTML('afterbegin', "<p>" + tweet_urls[i] + "<\/p>");
