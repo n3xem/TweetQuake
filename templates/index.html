@@ -1,17 +1,42 @@
 {% extends "layout.html" %}
 {% block title %} Map {% endblock %}
 {% block head %}
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css">
 <link rel="stylesheet" href="static/css/style.css">
-<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 {% endblock %}
 {% block body %}
-<h1> TweetQuake</h1>
-<form action="/result" method="get">
-    <label for="url">Tweet URL</label>
-    <input type="text" name="name">
+<div id="mapid"></div>
+<script>
+    var tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '© <a href="http://osm.org/copyright">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
+});
+var map = L.map('mapid', {
+  center: [36, 140],
+  zoom: 5,
+  layers: [tileLayer],
+});
+map.zoomControl.setPosition("bottomright");
+
+//mapの上におくformを定義
+L.Control.form = L.Control.extend({
+  onAdd: function(map){
+    let text = L.DomUtil.create('div');
+    text.id= "l-control-form";
+    text.innerHTML = `<form action="/result" method="get" id="form">
+    <input type="text" name="name" placeholder="Tweet URL">
     <button type="submit">送信</button>
-</form>
+</form>`;
+    return text;
+  },
+
+  onRemove: function(map){
+
+  }
+});
+L.control.form = function(opts){
+  return new L.Control.form(opts);
+}
+L.control.form({position: 'topleft'}).addTo(map);
+
 
 </script>
 

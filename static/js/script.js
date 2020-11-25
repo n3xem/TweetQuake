@@ -1,9 +1,15 @@
-let init = () => {
-    let map = L.map('mapid');
-    map.setView([38.40, 136], 5);
-    L.tileLayer('https://cyberjapandata.gsi.go.jp/xyz/pale/{z}/{x}/{y}.png', {
-        attribution: "<a href='https://maps.gsi.go.jp/development/ichiran.html' target='_blank'>地理院タイル</a>"
-    }).addTo(map);
-    L.control.scale({ maxWidth: 200, position: 'bottomright', imperial: false }).addTo(map);
-    L.control.zoom({ position: 'bottomleft' }).addTo(map);
+const createLabel = (L, id, html, position) => {
+    L.Control.label = L.Control.extend({
+        onAdd: function (map) {
+            let text = L.DomUtil.create('div');
+            text.id = id;
+            text.innerHTML = html;
+            return text;
+        },
+        onRemove: function (map) { }
+    });
+    L.control.label = function (opts) {
+        return new L.Control.label(opts);
+    }
+    L.control.label({ position: position }).addTo(map);
 };

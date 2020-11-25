@@ -7,3 +7,22 @@ html, body, #mapid {
      height: 100%;
      width:100vw;
     }
+
+input[type='text']{
+     width: 100%;
+     max-width:400px;
+     padding:5px;
+     border-radius: 5px;
+     border: 1px solid #ccc;
+     appearance: none;
+     display: inline;
+}
+button[type="submit"]{
+     border: none;
+     display: inline;
+     border-radius: 5px;
+     background-color: #333;
+     color: #fff;
+     appearance: none;
+     cursor: pointer;
+}
