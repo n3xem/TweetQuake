@@ -1,8 +1,9 @@
 import find_earthquake_from_tweet as feft
 import re
+import datetime as dt
 from flask import Flask, request, render_template
 
-from find_earthquake_from_tweet import tweet_time2earthquake
+from find_earthquake_from_tweet import tweet_time2earthquake, tweeturl2id, tweetid2time
 app = Flask(__name__)
 
 
@@ -22,12 +23,14 @@ def result():
     observ_point_rep_num = {}
     tweet_urls = list(set(request.args.getlist("name")))
     tweet_urls = [url for url in tweet_urls if re.match(
-        r'^https://twitter.com/.*/status/([0-9]{10,})$', url)]
+        r'^https://twitter.com/.*/status/([0-9]{10,})$', url) and tweetid2time(tweeturl2id(url)) < dt.datetime(2019, 1, 1, 0, 0, tzinfo=dt.timezone(dt.timedelta(hours=9)))]
+
+    tweet_ids = [tweeturl2id(tweet_url) for tweet_url in tweet_urls]
+    tweet_times = [tweetid2time(tweet_id) for tweet_id in tweet_ids]
 
     quake_dics = []
-    for n in tweet_urls:
-        tweetid = feft.tweeturl2id(n)
-        tweet_time = feft.tweetid2time(tweetid)
+    # for n in tweet_urls:
+    for tweet_time in tweet_times:
         earthquake = tweet_time2earthquake(tweet_time)
         quake_dics.append(earthquake)
         for intensity in earthquake["intensities"]:
