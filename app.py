@@ -12,6 +12,11 @@ def hello_world():
     return render_template("index.html")
 
 
+@app.route('/tutorial')
+def tutorial():
+    return render_template("index.html")
+
+
 @app.route('/map')
 def map():
     return render_template('map.html')
@@ -23,7 +28,7 @@ def result():
     observ_point_rep_num = {}
     tweet_urls = list(set(request.args.getlist("name")))
     tweet_urls = [url for url in tweet_urls if re.match(
-        r'^https://twitter.com/.*/status/([0-9]{10,})$', url) and tweetid2time(tweeturl2id(url)) < dt.datetime(2019, 1, 1, 0, 0, tzinfo=dt.timezone(dt.timedelta(hours=9)))]
+        r'^\s*https://twitter.com/.*/status/([0-9]{10,})\s*$', url) and tweetid2time(tweeturl2id(url)) < dt.datetime(2019, 1, 1, 0, 0, tzinfo=dt.timezone(dt.timedelta(hours=9)))]
 
     tweet_ids = [tweeturl2id(tweet_url) for tweet_url in tweet_urls]
     tweet_times = [tweetid2time(tweet_id) for tweet_id in tweet_ids]

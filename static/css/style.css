@@ -9,8 +9,7 @@ html, body, #mapid {
     }
 
 input[type='text']{
-     width: 100%;
-     max-width:400px;
+     width: 300px;
      padding:5px;
      border-radius: 5px;
      border: 1px solid #ccc;
@@ -26,4 +25,7 @@ button[type="submit"]{
      appearance: none;
      cursor: pointer;
      margin: 4px;
+}
+.introjs-tooltip{
+     max-width: none;
 }

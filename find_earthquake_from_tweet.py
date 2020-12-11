@@ -6,7 +6,8 @@ import re
 
 
 def tweeturl2id(url: str):
-    match = re.match(r'^https://twitter.com/.*/status/([0-9]{10,})$', url)
+    match = re.match(
+        r'^\s*https://twitter.com/.*/status/([0-9]{10,})\s*$', url)
     if match:
         tweetid = int(match.group(1))
         return tweetid
