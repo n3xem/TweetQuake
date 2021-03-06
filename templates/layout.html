@@ -1,19 +1,22 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
+
 <head>
-    <title>{% block title %}{% endblock %}</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css">
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/3.1.0/intro.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/3.1.0/introjs.css">
-    {% block head %}{% endblock %}
+  <title>{% block title %}{% endblock %}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css">
+  <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/3.1.0/intro.js"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/3.1.0/introjs.css">
+  {% block head %}{% endblock %}
 </head>
+
 <body>
-    <script src="static/js/script.js"></script>
-    {% block body %}{% endblock %}
-    <script>
-        createImg(L, "static/images/logo.png", '300px', 'bottomleft');
-        createLabel(L, "source", '<p>気象庁「震度データ 2010～2018」（https://www.data.jma.go.jp/svd/eqev/data/bulletin/shindo.html）を加工して作成</p>', 'bottomleft');
-    </script>
+  <script src="static/js/script.js"></script>
+  {% block body %}{% endblock %}
+  <script>
+    createImg(L, "static/images/logo.png", '300px', 'bottomleft');
+    createLabel(L, "source", '<p>気象庁「震度データ 2010～2018」（https://www.data.jma.go.jp/svd/eqev/data/bulletin/shindo.html）を加工して作成</p>', 'bottomleft');
+  </script>
 </body>
+
 </html>

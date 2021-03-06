@@ -13,198 +13,193 @@
 -->
 <div id="mapid"></div>
 <script type="text/javascript">
- let quake_dics = JSON.parse('{{ quake_dics | tojson }}');
+  let quake_dics = JSON.parse('{{ quake_dics | tojson }}');
 
- let intensity_colorcode = {
-        1: '#0c0e0e',
-        2: '#0f3b3d',
-        3: '#00269a',
-        4: '#5d4d0d',
-        A: '#c2b326',
-        B: '#b47518',
-        C: '#9f1b03',
-        D: '#770012',
-        7: '#86004b'
-    };
+  let intensity_colorcode = {
+    1: '#0c0e0e',
+    2: '#0f3b3d',
+    3: '#00269a',
+    4: '#5d4d0d',
+    A: '#c2b326',
+    B: '#b47518',
+    C: '#9f1b03',
+    D: '#770012',
+    7: '#86004b'
+  };
 
-let tweet_intensities = [];
+  let tweet_intensities = [];
 
-for(let j in quake_dics){
-  intensities = quake_dics[j]["intensities"];
-  let circles = [];
-  for (let i in intensities){
+  for (let j in quake_dics) {
+    intensities = quake_dics[j]["intensities"];
+    let circles = [];
+    for (let i in intensities) {
       let lat = intensities[i]["latitude"];
       let lon = intensities[i]["longitude"];
       let latlng = L.latLng(lat, lon);
       let observ = intensities[i]["observ_point_num"];
       let intensity_num = intensities[i]["intensity"];
 
-
       let circle = L.circle(latlng, {
-          color: intensity_colorcode[intensity_num],
-          fillColor: intensity_colorcode[intensity_num],
-          fillOpacity:0.3,
-          radius: 1000
+        color: intensity_colorcode[intensity_num],
+        fillColor: intensity_colorcode[intensity_num],
+        fillOpacity: 0.3,
+        radius: 1000
       });
-    circles.push(circle);
+      circles.push(circle);
+    }
+    tweet_intensities.push(L.layerGroup(circles));
   }
-  tweet_intensities.push(L.layerGroup(circles));
-}
-let tweet_urls = JSON.parse('{{ tweet_urls | tojson }}');
+  let tweet_urls = JSON.parse('{{ tweet_urls | tojson }}');
 
-//重複観測点を追加
-let overlap_observ_points = JSON.parse('{{ overlap_observ_points | tojson }}');
+  //重複観測点を追加
+  let overlap_observ_points = JSON.parse('{{ overlap_observ_points | tojson }}');
 
-let overlap_circles = [];
-for(let i in overlap_observ_points){
-  let lat = overlap_observ_points[i]["latitude"];
-  let lon = overlap_observ_points[i]["longitude"];
-  let latlng = L.latLng(lat,lon);
+  let overlap_circles = [];
+  for (let i in overlap_observ_points) {
+    let lat = overlap_observ_points[i]["latitude"];
+    let lon = overlap_observ_points[i]["longitude"];
+    let latlng = L.latLng(lat, lon);
 
-  let circle = L.circle(latlng, {
-    color: '#ff0000',
-    fillColor: '#ff0000',
-    fillOpacity: 0.3,
-    radius:1000
+    let circle = L.circle(latlng, {
+      color: '#ff0000',
+      fillColor: '#ff0000',
+      fillOpacity: 0.3,
+      radius: 1000
+    });
+    overlap_circles.push(circle);
+  }
+
+  overlap_layergroup = L.layerGroup(overlap_circles);
+
+  //チェックボックスの項目
+  let overlayLayerControls = {};
+  for (let i in tweet_urls) {
+    overlayLayerControls[tweet_urls[i]] = tweet_intensities[i];
+  }
+  overlayLayerControls["重複している観測点"] = overlap_layergroup;
+
+  //マップ作製
+  var tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="http://osm.org/copyright">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
   });
+  var map = L.map('mapid', {
+    center: [36, 140],
+    zoom: 5,
+    layers: [tileLayer].concat(tweet_intensities),
+  });
+  map.zoomControl.setPosition("bottomright");
 
-  overlap_circles.push(circle);
-}
+  //オーバーレイレイヤーを追加
+  L.control.layers(null, overlayLayerControls, {
+    collapsed: false,
+  }).addTo(map);
 
-overlap_layergroup = L.layerGroup(overlap_circles);
+  //mapの上におくformを定義
+  createForm(L);
 
-//チェックボックスの項目
-let overlayLayerControls = {};
-for(let i in tweet_urls){
-  overlayLayerControls[tweet_urls[i]] = tweet_intensities[i];
-}
-overlayLayerControls["重複している観測点"] = overlap_layergroup;
+  //type=hiddenでツイートリスを置いておく
+  for (let i in tweet_urls) {
+    document.getElementById("form").insertAdjacentHTML('afterbegin', '<input type="hidden" name="name" value="' + tweet_urls[i] + '">');
+  }
 
-//マップ作製
-var tileLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '© <a href="http://osm.org/copyright">OpenStreetMap</a> contributors, <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>',
-});
-var map = L.map('mapid', {
-  center: [36, 140],
-  zoom: 5,
-  layers: [tileLayer].concat(tweet_intensities),
-});
-map.zoomControl.setPosition("bottomright");
+  //checkboxの横にformを置いてボタンとhiddeninputを追加する
+  for (let i = 0; i < tweet_urls.length; i++) {
+    let overlay_span_element = document.querySelector('.leaflet-control-layers-overlays label:nth-child(' + (i + 1) + ') div span');
+    overlay_span_element.insertAdjacentHTML('afterend', '<form action="/result" method="get" style="display: inline" id="remove' + i + '"><button type="submit">削除</button></form>');
 
-//オーバーレイレイヤーを追加
-L.control.layers(null, overlayLayerControls,{
-  collapsed: false,
-}).addTo(map);
-
-//mapの上におくformを定義
-createForm(L);
-
-
-//type=hiddenでツイートリスを置いておく
-for(let i in tweet_urls){
-  document.getElementById("form").insertAdjacentHTML('afterbegin', '<input type="hidden" name="name" value="' + tweet_urls[i] + '">');
-  //document.getElementById("tweeturlpv").insertAdjacentHTML('afterbegin', "<p>" + tweet_urls[i] + "<\/p>");
-}
-
-//checkboxの横にformを置いてボタンとhiddeninputを追加する
-for(let i = 0; i < tweet_urls.length; i++){
-  let overlay_span_element = document.querySelector('.leaflet-control-layers-overlays label:nth-child(' + (i+1) + ') div span');
-  overlay_span_element.insertAdjacentHTML('afterend', '<form action="/result" method="get" style="display: inline" id="remove' + i + '"><button type="submit">削除</button></form>');
-
-  let form = document.querySelector('#remove' + i);
-  for(let j = 0; j < tweet_urls.length; j++){
-    if(i != j){
-      form.insertAdjacentHTML('afterbegin', '<input type="hidden" name="name" value="' + tweet_urls[j] + '">');
+    let form = document.querySelector('#remove' + i);
+    for (let j = 0; j < tweet_urls.length; j++) {
+      if (i != j) {
+        form.insertAdjacentHTML('afterbegin', '<input type="hidden" name="name" value="' + tweet_urls[j] + '">');
+      }
     }
   }
-}
 
-if(RegExp('tutorial=2', 'gi').test(window.location.search)){
-  document.querySelector('#tweet_url').value = "";
-  intro = introJs();
-  intro.setOptions({
-    steps:[
-      {
-        element:document.querySelector('g'),
-        intro: "地図上に観測点が表示されましたね！"
-      },
-      {
-        element: document.querySelector('.leaflet-control-layers'),
-        intro: "ここに、現在観測点の表示に使っているツイートURLの一覧が表示されます。",
-        position:"left"
-      },
-      {
-        element: document.querySelector('#tweet_url'),
-        intro: "さらにツイートURLを追加してみましょう",
-        position: "bottom"
-      },
-      {
-        element: document.querySelector('#tweet_url_submit'),
-        intro: "送信ボタンを押します。"
-      }
-    ]
-  }).onchange((targetElement) => {
-    let tweet_url = "https://twitter.com/ID/status/1065976073005948929";
+  if (RegExp('tutorial=2', 'gi').test(window.location.search)) {
+    document.querySelector('#tweet_url').value = "";
+    introJs().setOptions({
+      steps: [
+        {
+          element: document.querySelector('g'),
+          intro: "地図上に観測点が表示されましたね！"
+        },
+        {
+          element: document.querySelector('.leaflet-control-layers'),
+          intro: "ここに、現在観測点の表示に使っているツイートURLの一覧が表示されます。",
+          position: "left"
+        },
+        {
+          element: document.querySelector('#tweet_url'),
+          intro: "さらにツイートURLを追加してみましょう",
+          position: "bottom"
+        },
+        {
+          element: document.querySelector('#tweet_url_submit'),
+          intro: "送信ボタンを押します。"
+        }
+      ],
+      exitOnOverlayClick: false
+    }).onchange((targetElement) => {
+      let tweet_url = "https://twitter.com/ID/status/1065976073005948929";
 
-    let textbox_input = () => {
-      console.log(tweet_url);
-      if(tweet_url === ''){
-        return;
-      }
-      tweet_url_element =  document.querySelector('#tweet_url');
-      tweet_url_element.value = tweet_url_element.value + tweet_url.slice(0, 1);
-      tweet_url = tweet_url.slice(1);
-      setTimeout(textbox_input, 30);
-    }
-    console.log("targetElement:" + targetElement.id);
-    switch (targetElement.id){
-      case "tweet_url":
-        targetElement.value = "";
+      let textbox_input = () => {
+        console.log(tweet_url);
+        if (tweet_url === '') {
+          return;
+        }
+        tweet_url_element = document.querySelector('#tweet_url');
+        tweet_url_element.value = tweet_url_element.value + tweet_url.slice(0, 1);
+        tweet_url = tweet_url.slice(1);
         setTimeout(textbox_input, 30);
-    }
-  }).oncomplete(() => {
-    window.location.href = "/result?name=https%3A%2F%2Ftwitter.com%2FID%2Fstatus%2F1046965248379510785&name=https%3A%2F%2Ftwitter.com%2FID%2Fstatus%2F1065976073005948929&tutorial=3";
-  }).start();
-}else if(RegExp('tutorial=3', 'gi').test(window.location.search)){
-  intro = introJs();
-  intro.setOptions({
-    steps:[
-      {
-        intro: "更に観測点が追加されました！",
-        element: document.querySelector('g')
-      },
-      {
-        intro: "しかし、これだけでは観測点の表示される範囲が増えただけで、何がなんだか分かりませんね。"
-      },
-      {
-        intro: "そこで、「重複している観測点」にチェックを入れてみます。",
-        element: document.querySelector('.leaflet-control-layers-overlays label:last-of-type')
-      },
-      {
-        intro: "すると、「それぞれのツイートから抽出した観測点が重複している部分」が赤くなりました！",
-        element: document.querySelector('g')
-      },
-      {
-        intro: "このように、観測点の元となるツイートの数を増やしていくことで、どんどん位置情報が絞り込まれていくのが分かると思います。"
-      },
-      {
-        intro: "ぜひこのサイトを、ツイートからどれだけの位置情報が漏れてしまっているのかを調べるのに役立ててくださいね！"
       }
-    ]
-  }).onchange((targetElement) => {
-    dup_checkbox = document.querySelector("label:last-of-type .leaflet-control-layers-selector");
-    if(targetElement.tagName == "LABEL" && !dup_checkbox.checked){
-      dup_checkbox.click();
-    }
-  }).oncomplete(() => {
-    window.location.href = "/";
-  }).start();
-}
+      console.log("targetElement:" + targetElement.id);
+      switch (targetElement.id) {
+        case "tweet_url":
+          targetElement.value = "";
+          setTimeout(textbox_input, 30);
+      }
+    }).oncomplete(() => {
+      window.location.href = "/result?name=https%3A%2F%2Ftwitter.com%2FID%2Fstatus%2F1046965248379510785&name=https%3A%2F%2Ftwitter.com%2FID%2Fstatus%2F1065976073005948929&tutorial=3";
+    }).start();
+  } else if (RegExp('tutorial=3', 'gi').test(window.location.search)) {
+    introJs().setOptions({
+      steps: [
+        {
+          intro: "更に観測点が追加されました！",
+          element: document.querySelector('g')
+        },
+        {
+          intro: "しかし、これだけでは観測点の表示される範囲が増えただけで、何がなんだか分かりませんね。"
+        },
+        {
+          intro: "そこで、「重複している観測点」にチェックを入れてみます。",
+          element: document.querySelector('.leaflet-control-layers-overlays label:last-of-type')
+        },
+        {
+          intro: "すると、「それぞれのツイートから抽出した観測点が重複している部分」が赤くなりました！",
+          element: document.querySelector('g')
+        },
+        {
+          intro: "このように、観測点の元となるツイートの数を増やしていくことで、どんどん位置情報が絞り込まれていくのが分かると思います。"
+        },
+        {
+          intro: "ぜひこのサイトを、ツイートからどれだけの位置情報が漏れてしまっているのかを調べるのに役立ててくださいね！"
+        }
+      ],
+      exitOnOverlayClick: false
+    }).onchange((targetElement) => {
+      dup_checkbox = document.querySelector("label:last-of-type .leaflet-control-layers-selector");
+      if (targetElement.tagName == "LABEL" && !dup_checkbox.checked) {
+        dup_checkbox.click();
+      }
+    }).oncomplete(() => {
+      window.location.href = "/";
+    }).start();
+  }
 
-let tutorial = () => {
-  window.location.href = "/tutorial";
-}
-
+  let tutorial = () => {
+    window.location.href = "/tutorial";
+  }
 </script>
 
 {% endblock %}

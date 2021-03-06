@@ -13,6 +13,7 @@ const createLabel = (L, id, html, position) => {
     }
     L.control.label({ position: position }).addTo(map);
 };
+
 const createImg = (L, src, width, position) => {
     L.Control.img = L.Control.extend({
         onAdd: function (map) {
@@ -25,7 +26,6 @@ const createImg = (L, src, width, position) => {
             return img;
         },
         onRemove: function (map) {
-
         }
     });
     L.control.img = function (opts) {
@@ -33,6 +33,7 @@ const createImg = (L, src, width, position) => {
     }
     L.control.img({ position: position }).addTo(map);
 };
+
 const createForm = (L) => {
     L.Control.form = L.Control.extend({
         onAdd: function (map) {
@@ -46,9 +47,7 @@ const createForm = (L) => {
 `;
             return text;
         },
-
         onRemove: function (map) {
-
         }
     });
     L.control.form = function (opts) {
